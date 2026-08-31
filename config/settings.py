@@ -14,21 +14,16 @@ from pathlib import Path
 
 import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = env("DEBUG", True)
 
 ALLOWED_HOSTS = []
 
@@ -46,6 +41,7 @@ INSTALLED_APPS = [
 
 LOCAL_APPS = [
     "accounts",
+    "rides",
 ]
 
 THIRD_PARTY_APPS = [
@@ -86,10 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -97,9 +89,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -116,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-DJANGO_AUTO_FIELD = "djagno.db.models.BigAutoField"
+
 AUTH_USER_MODEL = "accounts.USER"
 
 REST_FRAMEWORK = {
@@ -125,6 +114,16 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Ride API",
+    "DESCRIPTION": "Ride, rider/driver and ride-event data for admin users.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 
