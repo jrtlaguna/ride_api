@@ -23,7 +23,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("SECRET_KEY")
 
 
-DEBUG = env("DEBUG", True)
+DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = []
 
@@ -82,10 +82,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# A single DATABASE_URL keeps the host and the Docker Compose service in sync:
+# locally it points at localhost, in Compose the app service overrides it with
+# the `db` service name. Nothing else in settings needs to change between them.
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        **env.db(
+            "DATABASE_URL",
+            default="postgres://ride_api:ride_api@localhost:5432/ride_api",
+        ),
+        # Persistent connections; Compose can restart the database out from
+        # under the app, so a pooled connection is checked before it is reused.
+        "CONN_MAX_AGE": env.int("CONN_MAX_AGE", default=60),
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 
@@ -148,8 +157,4 @@ STATIC_URL = "static/"
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    },
-}
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
