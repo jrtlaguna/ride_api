@@ -21,7 +21,7 @@ def create_users(apps, schema_editor):
             email=f"rider{i:02d}@{SEED_DOMAIN}",
             first_name=f"Rider{i:02d}",
             last_name="Seed",
-            role="rider",  # User.Role is unavailable on historical models
+            role="rider",
             password=unusable,
             is_active=True,
             is_staff=False,
@@ -42,12 +42,8 @@ def create_users(apps, schema_editor):
         for i in range(1, DRIVER_COUNT + 1)
     ]
 
-    # ignore_conflicts keeps a re-run harmless if the rows already exist.
     User.objects.bulk_create(rows, ignore_conflicts=True)
 
-    # The admin is the one seeded account that can log in, so it is created only
-    # when a password is supplied via ADMIN_USER_PASSWORD. No password, no
-    # account -- rather than a privileged user with a default credential.
     email, password = _admin_email(), settings.ADMIN_USER_PASSWORD
     if not (email and password):
         return
@@ -61,12 +57,6 @@ def create_users(apps, schema_editor):
         "is_staff": True,
         "is_superuser": True,
     }
-    # update_or_create rather than bulk_create/ignore_conflicts: if the row
-    # already exists, ignore_conflicts would silently keep a stale hash and
-    # ADMIN_USER_PASSWORD would no longer match what is stored. Re-applying this
-    # migration is therefore also how you rotate the seeded admin's password.
-    # Email is lowercased in _admin_email: the historical model has no save()
-    # override, so the normalisation on the real model does not apply here.
     User.objects.update_or_create(email=email, defaults=defaults)
 
 
