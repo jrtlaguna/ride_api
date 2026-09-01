@@ -117,6 +117,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "accounts.USER"
 
+
+ADMIN_USER_EMAIL = env("ADMIN_USER_EMAIL", default="admin@example.com")
+ADMIN_USER_PASSWORD = env("ADMIN_USER_PASSWORD", default="admin")
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
