@@ -51,9 +51,6 @@ class RideSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(RideEventSerializer(many=True))
     def get_todays_ride_events(self, obj):
-        # Populated by the view's Prefetch(to_attr=...). Read via getattr so a
-        # ride serialized outside that queryset degrades to an empty list rather
-        # than silently issuing a query per row.
         events = getattr(obj, "todays_ride_events", None)
         if events is None:
             return []

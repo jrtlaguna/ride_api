@@ -3,8 +3,36 @@ from django.contrib.auth.hashers import make_password
 from django.db import migrations
 
 SEED_DOMAIN = "seed.example.com"
-RIDER_COUNT = 10
-DRIVER_COUNT = 10
+
+RIDERS = [
+    ("Maria", "Santos"),
+    ("Paolo", "Reyes"),
+    ("Anna", "Cruz"),
+    ("Miguel", "Torres"),
+    ("Sofia", "Ramos"),
+    ("Diego", "Mendoza"),
+    ("Carla", "Bautista"),
+    ("Rafael", "Aquino"),
+    ("Elena", "Villanueva"),
+    ("Nico", "Domingo"),
+]
+
+DRIVERS = [
+    ("Chris", "Hernandez"),
+    ("Howard", "Yap"),
+    ("Randy", "Wong"),
+    ("Grace", "Lim"),
+    ("Marco", "Delacruz"),
+    ("Teresa", "Navarro"),
+    ("Victor", "Alonzo"),
+    ("Bea", "Castillo"),
+    ("Ramon", "Ocampo"),
+    ("Julia", "Fernandez"),
+]
+
+
+def _seed_email(first_name, last_name):
+    return f"{first_name}.{last_name}@{SEED_DOMAIN}".lower()
 
 
 def _admin_email():
@@ -18,28 +46,17 @@ def create_users(apps, schema_editor):
 
     rows = [
         User(
-            email=f"rider{i:02d}@{SEED_DOMAIN}",
-            first_name=f"Rider{i:02d}",
-            last_name="Seed",
-            role="rider",
+            email=_seed_email(first_name, last_name),
+            first_name=first_name,
+            last_name=last_name,
+            role=role,
             password=unusable,
             is_active=True,
             is_staff=False,
             is_superuser=False,
         )
-        for i in range(1, RIDER_COUNT + 1)
-    ] + [
-        User(
-            email=f"driver{i:02d}@{SEED_DOMAIN}",
-            first_name=f"Driver{i:02d}",
-            last_name="Seed",
-            role="driver",
-            password=unusable,
-            is_active=True,
-            is_staff=False,
-            is_superuser=False,
-        )
-        for i in range(1, DRIVER_COUNT + 1)
+        for role, people in (("rider", RIDERS), ("driver", DRIVERS))
+        for first_name, last_name in people
     ]
 
     User.objects.bulk_create(rows, ignore_conflicts=True)

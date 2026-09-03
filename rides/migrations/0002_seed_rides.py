@@ -4,8 +4,6 @@ from datetime import timedelta
 from django.db import migrations
 from django.utils import timezone
 
-# Must match accounts.0002_seed_users.SEED_DOMAIN: this is how both the
-# forward and reverse operations identify seeded rows.
 SEED_DOMAIN = "seed.example.com"
 RIDE_COUNT = 50
 
