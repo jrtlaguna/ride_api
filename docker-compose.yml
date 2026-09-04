@@ -1,0 +1,45 @@
+services:
+  db:
+    # Pinned to 14 to match the Django 6.0 floor this project targets. Django
+    # 6.1 would require 15+; see README.
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ride_api}
+      POSTGRES_USER: ${POSTGRES_USER:-ride_api}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ride_api}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # 5433 on the host so this never collides with a local Postgres on 5432.
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    env_file: .env
+    environment:
+      # Overrides whatever .env says: inside the compose network the database
+      # answers to the service name, not localhost.
+      DATABASE_URL: postgres://${POSTGRES_USER:-ride_api}:${POSTGRES_PASSWORD:-ride_api}@db:5432/${POSTGRES_DB:-ride_api}
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        # Waits for pg_isready, not just for the container to exist, so the
+        # first migrate does not race the database's own initialisation.
+        condition: service_healthy
+    volumes:
+      - .:/app
+      # Anonymous volume keeps the image's Linux .venv from being shadowed by
+      # the host's, which is built for a different platform.
+      - /app/.venv
+
+volumes:
+  postgres_data:

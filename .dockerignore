@@ -1,0 +1,25 @@
+.git/
+.gitignore
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Never bake secrets into an image layer. Compose supplies these at runtime
+# via env_file instead.
+.env
+.env.*
+!.env.example
+*.pem
+
+db.sqlite3
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+.idea/
+.vscode/
